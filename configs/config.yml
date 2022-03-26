@@ -1,0 +1,9 @@
+http:
+  port: 8080
+
+storage:
+  root: storage
+  disks:
+    - public
+    - private
+    - test

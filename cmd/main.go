@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	_ "github.com/mattn/go-sqlite3"
-	"gofile"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"gofile/pkg/handler"
+	"gofile/pkg/infrastructure"
 	"gofile/pkg/repository"
 	"gofile/pkg/service"
 	"os"
@@ -12,41 +13,45 @@ import (
 	"syscall"
 )
 
-// ToDo:
-// 		config
-//		env
-//		log
-//		goroutines
-
 func main() {
-	db, err := repository.NewSqliteDB(repository.Config{
-		File: "./files.db",
-	})
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+
+	err := godotenv.Load()
 	if err != nil {
-		panic(err.Error())
+		logrus.Fatal(err.Error())
+	}
+
+	config, err := infrastructure.NewConfig()
+	if err != nil {
+		logrus.Fatal(err.Error())
+	}
+
+	err = infrastructure.NewStorage(config).Init()
+	if err != nil {
+		logrus.Fatal(err.Error())
+	}
+
+	db, err := infrastructure.NewSqliteDB()
+	if err != nil {
+		logrus.Fatal(err.Error())
 	}
 
 	repositories := repository.NewRepository(db)
 	services := service.NewService(repositories)
 	handlers := handler.NewHandler(services)
 
-	server := new(gofile.Server)
-
-	go func() {
-		if err = server.Run("8080", handlers.InitRouter()); err != nil {
-			panic(err.Error())
-		}
-	}()
+	server := new(infrastructure.Server)
+	server.RunInGoroutine(config.Get("http.port"), handlers.InitRouter())
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
 	if err := server.Shutdown(context.Background()); err != nil {
-		panic(err.Error())
+		logrus.Fatal(err.Error())
 	}
 
 	if err := db.Close(); err != nil {
-		panic(err.Error())
+		logrus.Fatal(err.Error())
 	}
 }

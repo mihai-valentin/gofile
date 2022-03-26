@@ -1,7 +1,8 @@
-package gofile
+package infrastructure
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -17,6 +18,14 @@ func (s *Server) Run(port string, handler http.Handler) error {
 	}
 
 	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) RunInGoroutine(port string, handler http.Handler) {
+	go func() {
+		if err := s.Run("8080", handler); err != nil {
+			logrus.Fatal(err.Error())
+		}
+	}()
 }
 
 func (s *Server) Shutdown(c context.Context) error {

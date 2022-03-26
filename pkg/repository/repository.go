@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/jmoiron/sqlx"
 	"gofile/pkg/entity"
+	"gofile/pkg/infrastructure"
 )
 
 type PublicFile interface {
@@ -22,9 +22,9 @@ type Repository struct {
 	PrivateFile
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(d *infrastructure.Database) *Repository {
 	return &Repository{
-		PublicFile:  NewPublicFileRepository(db),
-		PrivateFile: NewPrivateFileRepository(db),
+		PublicFile:  NewPublicFileRepository(d),
+		PrivateFile: NewPrivateFileRepository(d),
 	}
 }
