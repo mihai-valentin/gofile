@@ -5,5 +5,7 @@ import (
 )
 
 type PublicFilesList struct {
-	Payload []*multipart.FileHeader `form:"payload[]" binding:"required"`
+	Files  []*multipart.FileHeader `form:"files[]" binding:"required"`
+	Width  []uint16                `form:"presets[width][]"`
+	Height []uint16                `form:"presets[height][]"`
 }

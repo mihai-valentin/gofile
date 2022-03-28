@@ -13,11 +13,11 @@ type PublicFileService struct {
 func (s *PublicFileService) UploadFiles(files entity.PublicFilesList) ([]*entity.File, error) {
 	var uploadedFiles []*entity.File
 
-	for _, file := range files.Payload {
+	for _, file := range files.Files {
 		publicFile := entity.NewPublicFile(file)
 		s.repository.Create(*publicFile)
 
-		err := new(FileService).write(publicFile)
+		err := s.write(publicFile)
 		if err != nil {
 			return nil, err
 		}
@@ -47,5 +47,8 @@ func (s *PublicFileService) DeleteFile(uuid string) error {
 }
 
 func NewPublicFileService(repository repository.PublicFile) *PublicFileService {
-	return &PublicFileService{repository: repository}
+	return &PublicFileService{
+		FileService: new(FileService),
+		repository:  repository,
+	}
 }

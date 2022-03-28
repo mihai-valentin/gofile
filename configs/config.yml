@@ -6,4 +6,3 @@ storage:
   disks:
     - public
     - private
-    - test
