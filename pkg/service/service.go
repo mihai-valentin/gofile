@@ -6,7 +6,7 @@ import (
 )
 
 type PublicFile interface {
-	UploadFiles(files entity.PublicFilesList) ([]*entity.File, error)
+	UploadFiles(files entity.PublicFilesList) ([]*entity.FileEntity, error)
 	GetFile(uuid string) (entity.PublicFile, error)
 	DeleteFile(uuid string) error
 }

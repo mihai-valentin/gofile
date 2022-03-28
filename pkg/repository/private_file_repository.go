@@ -20,7 +20,7 @@ func (r *PrivateFileRepository) Create(file entity.File) {
 	fmt.Println(query)
 
 	t := r.db.MustBegin()
-	t.MustExec(query, file.Uuid, file.Path, file.Access, file.OwnerUuid, file.OwnerType, file.CreatedAt.String())
+	t.MustExec(query, file.Entity.Uuid, file.Entity.Path, file.Entity.Access, file.Entity.OwnerUuid, file.Entity.OwnerType, file.Entity.CreatedAt.String())
 	t.Commit()
 
 	//return t.Commit()

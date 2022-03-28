@@ -6,7 +6,7 @@ import (
 )
 
 type PublicFile interface {
-	Create(file entity.File)
+	Create(file *entity.FileEntity)
 	DeleteByUuid(uuid string) error
 	FindByUuid(uuid string) (entity.PublicFile, error)
 }

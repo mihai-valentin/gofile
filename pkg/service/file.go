@@ -16,7 +16,7 @@ func (s *FileService) write(f *gofile.File) error {
 	}
 	defer src.Close()
 
-	out, err := os.Create(f.Path)
+	out, err := os.Create(f.Entity.Path)
 	if err != nil {
 		return err
 	}

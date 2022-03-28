@@ -12,7 +12,7 @@ type PublicFileRepository struct {
 	db    *sqlx.DB
 }
 
-func (r *PublicFileRepository) Create(file entity.File) {
+func (r *PublicFileRepository) Create(file *entity.FileEntity) {
 	query := fmt.Sprintf(
 		"INSERT INTO %s (uuid, path, access, created_at) VALUES ($1, $2, $3, $4)",
 		r.table,

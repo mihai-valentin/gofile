@@ -12,26 +12,44 @@ const (
 	PrivateAccessType = "private"
 )
 
-type File struct {
-	Source    *multipart.FileHeader `json:"-"`
-	Uuid      string                `json:"uuid"`
-	Path      string                `json:"path"`
-	Access    string                `json:"access"`
-	OwnerType string                `json:"owner_type"`
-	OwnerUuid string                `json:"owner_uuid"`
-	CreatedAt time.Time             `json:"created_at"`
+type FileEntity struct {
+	Uuid      string    `json:"uuid"`
+	Path      string    `json:"path"`
+	Access    string    `json:"access"`
+	OwnerType string    `json:"owner_type"`
+	OwnerUuid string    `json:"owner_uuid"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-func newFile(access string, source *multipart.FileHeader) *File {
-	uuid := xid.New().String()
-	path := storageRoot + "/" + access + "/" + uuid + "_" + source.Filename
+type File struct {
+	Source *multipart.FileHeader `json:"-"`
+	Entity *FileEntity
+}
 
-	return &File{
-		Source:    source,
+func newFileEntity(access string, filename string) *FileEntity {
+	uuid := xid.New().String()
+	path := storageRoot + "/" + access + "/" + uuid + "_" + filename
+
+	return &FileEntity{
 		Uuid:      uuid,
 		Access:    access,
 		CreatedAt: time.Now(),
 		Path:      path,
+	}
+}
+
+func NewPublicFileEntity(filename string) *FileEntity {
+	return newFileEntity(PublicAccessType, filename)
+}
+
+func NewPrivateFileEntity(filename string) *FileEntity {
+	return newFileEntity(PrivateAccessType, filename)
+}
+
+func newFile(access string, source *multipart.FileHeader) *File {
+	return &File{
+		Source: source,
+		Entity: newFileEntity(access, source.Filename),
 	}
 }
 
@@ -41,8 +59,8 @@ func NewPublicFile(source *multipart.FileHeader) *File {
 
 func NewPrivateFile(source *multipart.FileHeader, owner FileOwner) *File {
 	privateFile := newFile(PrivateAccessType, source)
-	privateFile.OwnerUuid = owner.Uuid
-	privateFile.OwnerType = owner.Type
+	privateFile.Entity.OwnerUuid = owner.Uuid
+	privateFile.Entity.OwnerType = owner.Type
 
 	return privateFile
 }
