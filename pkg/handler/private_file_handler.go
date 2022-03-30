@@ -2,12 +2,12 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"gofile/pkg/entity"
+	"gofile/pkg/request"
 	"net/http"
 )
 
 func (h *Handler) uploadPrivateFile(c *gin.Context) {
-	var filesUploadForm entity.FilesUploadForm
+	var filesUploadForm request.FilesUploadForm
 
 	if err := c.ShouldBind(&filesUploadForm); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,7 +30,7 @@ func (h *Handler) getPrivateFile(c *gin.Context) {
 		return
 	}
 
-	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwner(c)) {
+	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwnerGuid(c)) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{})
 		return
 	}
@@ -46,7 +46,7 @@ func (h *Handler) deletePrivateFile(c *gin.Context) {
 		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
 	}
 
-	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwner(c)) {
+	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwnerGuid(c)) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{})
 	}
 

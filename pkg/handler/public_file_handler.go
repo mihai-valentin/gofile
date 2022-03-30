@@ -2,20 +2,23 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"gofile/pkg/entity"
+	"gofile/pkg/request"
+	"gofile/pkg/response"
 	"net/http"
 )
 
 func (h *Handler) uploadPublicFile(c *gin.Context) {
-	var filesUploadForm entity.FilesUploadForm
+	var pubicFilesUploadRequest request.PubicFilesUploadRequest
 
-	if err := c.ShouldBind(&filesUploadForm); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&pubicFilesUploadRequest); err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusBadRequest, err.Error()))
+		return
 	}
 
-	files, err := h.services.PublicFileManager.UploadFiles(filesUploadForm)
+	files, err := h.services.PublicFileManager.UploadFiles(pubicFilesUploadRequest)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Fail(c, response.NewErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
 	}
 
 	c.JSON(http.StatusCreated, files)

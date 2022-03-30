@@ -17,3 +17,11 @@ type File struct {
 	OwnerGuid   sql.NullString `json:"owner_guid" db:"owner_guid"`
 	CreatedAt   time.Time      `json:"created_at" db:"created_at"`
 }
+
+func (f *File) IsOfType(contentType string) bool {
+	return f.Type == contentType
+}
+
+func (f *File) IsAnImage() bool {
+	return f.IsOfType("image")
+}

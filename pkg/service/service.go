@@ -4,17 +4,13 @@ import (
 	"gofile/pkg/entity"
 	"gofile/pkg/infrastructure"
 	"gofile/pkg/repository"
+	"gofile/pkg/request"
 )
 
-type Error interface {
-	error
-	GetCode() int
-}
-
 type FileService interface {
-	UploadFiles(filesUploadForm entity.FilesUploadForm) ([]*entity.File, error)
-	GetFile(uuid string) (*entity.File, Error)
-	DeleteFile(uuid string) Error
+	UploadFiles(pubicFilesUploadRequest request.PubicFilesUploadRequest) ([]*entity.File, error)
+	GetFile(uuid string) (*entity.File, error)
+	DeleteFile(uuid string) error
 	MatchOwner(f *entity.File, o *entity.FileOwner) bool
 }
 

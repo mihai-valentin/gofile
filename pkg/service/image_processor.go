@@ -2,38 +2,17 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/nfnt/resize"
-	"github.com/rs/xid"
 	"gofile/pkg/entity"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"os"
-	"time"
 )
 
 type ImageProcessor struct {
-}
-
-func buildThumbnail(original *entity.File, delta uint) *entity.File {
-	filename := fmt.Sprintf("%d_%s", delta, original.Name)
-	path := fmt.Sprintf("storage/%s/%s_%s", original.Access, original.Uuid, filename)
-	uuid := xid.New().String()
-
-	return &entity.File{
-		Uuid:        uuid,
-		Name:        filename,
-		Access:      original.Access,
-		ContentType: original.ContentType,
-		Type:        original.Type,
-		Encoding:    original.Encoding,
-		Path:        path,
-		OwnerGuid:   original.OwnerGuid,
-		OwnerType:   original.OwnerType,
-		CreatedAt:   time.Now(),
-	}
+	*FileBuilder
 }
 
 func (processor *ImageProcessor) WritePresets(f *entity.File, presets []uint) ([]*entity.File, error) {
@@ -41,21 +20,20 @@ func (processor *ImageProcessor) WritePresets(f *entity.File, presets []uint) ([
 		return nil, nil
 	}
 
-	original, err := decodeImage(f.Path)
+	file, err := decodeImage(f.Path)
 	if err != nil {
 		return nil, err
 	}
 
 	var uploaded []*entity.File
-
 	for _, preset := range presets {
-		thumbnail := buildThumbnail(f, preset)
+		presetFile := processor.buildPresetFile(f, preset)
 
-		if err := writePreset(original, thumbnail, preset); err != nil {
+		if err := resizeAndSaveFile(file, presetFile, preset); err != nil {
 			return nil, err
 		}
 
-		uploaded = append(uploaded, thumbnail)
+		uploaded = append(uploaded, presetFile)
 	}
 
 	return uploaded, nil
@@ -93,17 +71,17 @@ func encodeImage(encoding string, i image.Image, f *os.File) error {
 	}
 }
 
-func writePreset(original image.Image, thumbnail *entity.File, delta uint) error {
-	preset := resize.Resize(delta, 0, original, resize.Lanczos3)
+func resizeAndSaveFile(file image.Image, presetFile *entity.File, scale uint) error {
+	preset := resize.Resize(scale, 0, file, resize.Lanczos3)
 
-	file, err := os.Create(thumbnail.Path)
+	dist, err := os.Create(presetFile.Path)
 	if err != nil {
 		return err
 	}
 
-	if err := encodeImage(thumbnail.Encoding, preset, file); err != nil {
+	if err := encodeImage(presetFile.Encoding, preset, dist); err != nil {
 		return err
 	}
 
-	return file.Close()
+	return dist.Close()
 }
