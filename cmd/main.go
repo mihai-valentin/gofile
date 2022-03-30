@@ -13,6 +13,13 @@ import (
 	"syscall"
 )
 
+/**
+ToDo:
+	tests
+	readme
+	aws
+*/
+
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 
@@ -37,7 +44,7 @@ func main() {
 	}
 
 	repositories := repository.NewRepository(db)
-	services := service.NewService(repositories)
+	services := service.NewService(repositories, config)
 	handlers := handler.NewHandler(services)
 
 	server := new(infrastructure.Server)

@@ -29,7 +29,7 @@ func (h *Handler) InitRouter() *gin.Engine {
 				public.DELETE("/:uuid", h.deletePublicFile)
 			}
 
-			private := files.Group("/private")
+			private := files.Group("/private", h.checkFileOwnerExistence)
 			{
 				private.POST("", h.uploadPrivateFile)
 				private.GET("/:uuid", h.getPrivateFile)

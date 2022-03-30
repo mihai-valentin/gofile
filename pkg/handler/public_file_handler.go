@@ -2,22 +2,20 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	_ "gofile/pkg/entity"
-	gofile "gofile/pkg/entity"
+	"gofile/pkg/entity"
 	"net/http"
 )
 
 func (h *Handler) uploadPublicFile(c *gin.Context) {
-	var publicFiles gofile.PublicFilesList
+	var filesUploadForm entity.FilesUploadForm
 
-	if err := c.ShouldBind(&publicFiles); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if err := c.ShouldBind(&filesUploadForm); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	files, err := h.services.PublicFile.UploadFiles(publicFiles)
+	files, err := h.services.PublicFileManager.UploadFiles(filesUploadForm)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
 	c.JSON(http.StatusCreated, files)
@@ -26,9 +24,9 @@ func (h *Handler) uploadPublicFile(c *gin.Context) {
 func (h *Handler) getPublicFile(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	file, err := h.services.PublicFile.GetFile(uuid)
+	file, err := h.services.PublicFileManager.GetFile(uuid)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -37,10 +35,9 @@ func (h *Handler) getPublicFile(c *gin.Context) {
 
 func (h *Handler) deletePublicFile(c *gin.Context) {
 	uuid := c.Param("uuid")
-	err := h.services.PublicFile.DeleteFile(uuid)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+
+	if err := h.services.PublicFileManager.DeleteFile(uuid); err != nil {
+		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
 	}
 
 	c.JSON(http.StatusNoContent, gin.H{})

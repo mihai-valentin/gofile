@@ -1,6 +1,10 @@
 http:
   port: 8080
 
+access:
+  public_mode: public
+  private_mode: private
+
 storage:
   root: storage
   disks:
