@@ -6,17 +6,16 @@ import (
 	"gofile/pkg/request"
 )
 
-type FileManager struct {
+type PublicFileManager struct {
 	*FileBuilder
 	*StorageService
 	*ImageProcessor
 	access     string
-	repository repository.FileRepositoryInterface
+	repository repository.PublicFileSqlite
 }
 
-func NewFileService(repository repository.FileRepositoryInterface, mode string) *FileManager {
-	return &FileManager{
-		access:         mode,
+func NewPublicFileManager(repository repository.PublicFileSqlite) *PublicFileManager {
+	return &PublicFileManager{
 		FileBuilder:    new(FileBuilder),
 		StorageService: new(StorageService),
 		ImageProcessor: new(ImageProcessor),
@@ -24,7 +23,7 @@ func NewFileService(repository repository.FileRepositoryInterface, mode string) 
 	}
 }
 
-func (s *FileManager) UploadFiles(pubicFilesUploadRequest request.PubicFilesUploadRequest) ([]*entity.File, error) {
+func (s *PublicFileManager) UploadPublicFiles(pubicFilesUploadRequest request.PubicFilesUploadRequest) ([]*entity.File, error) {
 	var files []*entity.File
 	presetsCount := len(pubicFilesUploadRequest.Presets)
 
@@ -32,7 +31,7 @@ func (s *FileManager) UploadFiles(pubicFilesUploadRequest request.PubicFilesUplo
 		formFileContentType := formFile.Header.Get("Content-Type")
 		file := s.buildFile(s.access, formFile.Filename, formFileContentType)
 
-		if err := s.repository.Create(file); err != nil {
+		if err := s.repository.CreatePublicFile(file); err != nil {
 			return nil, err
 		}
 
@@ -52,7 +51,7 @@ func (s *FileManager) UploadFiles(pubicFilesUploadRequest request.PubicFilesUplo
 		}
 
 		for _, preset := range presets {
-			if err := s.repository.Create(preset); err != nil {
+			if err := s.repository.CreatePublicFile(preset); err != nil {
 				return nil, err
 			}
 
@@ -63,8 +62,8 @@ func (s *FileManager) UploadFiles(pubicFilesUploadRequest request.PubicFilesUplo
 	return files, nil
 }
 
-func (s *FileManager) GetFile(uuid string) (*entity.File, error) {
-	file, err := s.repository.FindByUuidAndAccess(uuid, s.access)
+func (s *PublicFileManager) GetPublicFile(uuid string) (*entity.File, error) {
+	file, err := s.repository.FindPublicFileByUuid(uuid)
 	if file == nil {
 		return nil, err
 	}
@@ -76,13 +75,13 @@ func (s *FileManager) GetFile(uuid string) (*entity.File, error) {
 	return file, nil
 }
 
-func (s *FileManager) DeleteFile(uuid string) error {
-	file, err := s.GetFile(uuid)
+func (s *PublicFileManager) DeletePublicFile(uuid string) error {
+	file, err := s.GetPublicFile(uuid)
 	if err != nil {
 		return err
 	}
 
-	if err := s.repository.DeleteByUuid(uuid); err != nil {
+	if err := s.repository.DeletePublicFileByUuid(uuid); err != nil {
 		return err
 	}
 
@@ -91,8 +90,4 @@ func (s *FileManager) DeleteFile(uuid string) error {
 	}
 
 	return nil
-}
-
-func (s *FileManager) MatchOwner(f *entity.File, o *entity.FileOwner) bool {
-	return o.Guid == f.OwnerGuid.String && o.Type == f.OwnerType.String
 }

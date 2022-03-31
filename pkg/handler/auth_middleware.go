@@ -8,7 +8,7 @@ import (
 
 const token = "123456789"
 
-func (h *Handler) authorization(c *gin.Context) {
+func (h *FileHandler) authorization(c *gin.Context) {
 	authorizationHeader := c.GetHeader("Authorization")
 	if authorizationHeader == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "authorization header missing"})

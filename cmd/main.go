@@ -43,9 +43,9 @@ func main() {
 		logrus.Fatal(err.Error())
 	}
 
-	repositories := repository.NewRepository(db)
-	services := service.NewService(repositories, config)
-	handlers := handler.NewHandler(services)
+	repositories := repository.New(db)
+	services := service.New(repositories)
+	handlers := handler.New(services)
 
 	server := new(infrastructure.Server)
 	server.RunInGoroutine(config.Get("http.port"), handlers.InitRouter())

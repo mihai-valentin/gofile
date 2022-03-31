@@ -1,22 +1,15 @@
 package repository
 
-import (
-	"gofile/pkg/entity"
-	"gofile/pkg/infrastructure"
-)
-
-type FileRepositoryInterface interface {
-	Create(file *entity.File) error
-	DeleteByUuid(uuid string) error
-	FindByUuidAndAccess(uuid string, access string) (*entity.File, error)
-}
+import "gofile/pkg/infrastructure"
 
 type Repository struct {
-	FileRepositoryInterface
+	*PublicFileSqlite
+	*PrivateFileSqlite
 }
 
-func NewRepository(db *infrastructure.Database) *Repository {
+func New(db *infrastructure.Database) *Repository {
 	return &Repository{
-		FileRepositoryInterface: NewFileRepository(db),
+		NewPublicFileSqlite(db.DB),
+		NewPrivateFileSqlite(db.DB),
 	}
 }

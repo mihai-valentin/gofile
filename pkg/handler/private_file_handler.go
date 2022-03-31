@@ -3,56 +3,59 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"gofile/pkg/request"
+	"gofile/pkg/response"
 	"net/http"
 )
 
-func (h *Handler) uploadPrivateFile(c *gin.Context) {
-	var filesUploadForm request.FilesUploadForm
+func (h *FileHandler) uploadPrivateFile(c *gin.Context) {
+	var privateFilesUploadRequest request.PrivateFilesUploadRequest
 
-	if err := c.ShouldBind(&filesUploadForm); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&privateFilesUploadRequest); err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusBadRequest, err.Error()))
+		return
 	}
 
-	files, err := h.services.PrivateFileManager.UploadFiles(filesUploadForm)
+	files, err := h.service.UploadFiles(&FileUploadData{})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Fail(c, response.NewErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
 	}
 
 	c.JSON(http.StatusCreated, files)
 }
 
-func (h *Handler) getPrivateFile(c *gin.Context) {
-	uuid := c.Param("uuid")
+func (h *FileHandler) getPrivateFile(c *gin.Context) {
+	//uuid := c.Param("uuid")
+	var privateFileAccessRequest request.PrivateFileAccessRequest
 
-	file, err := h.services.PrivateFileManager.GetFile(uuid)
-	if err != nil {
-		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&privateFileAccessRequest); err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
-	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwnerGuid(c)) {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{})
+	file, err := h.service.GetFileByFilter(&EntityFilter{})
+	if err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusNotFound, err.Error()))
 		return
 	}
 
 	c.File(file.Path)
 }
 
-func (h *Handler) deletePrivateFile(c *gin.Context) {
-	uuid := c.Param("uuid")
+func (h *FileHandler) deletePrivateFile(c *gin.Context) {
+	//uuid := c.Param("uuid")
+	var privateFileAccessRequest request.PrivateFileAccessRequest
 
-	file, err := h.services.PrivateFileManager.GetFile(uuid)
+	if err := c.ShouldBind(&privateFileAccessRequest); err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	err := h.service.DeleteFileByFilter(&EntityFilter{})
 	if err != nil {
-		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
+		response.Fail(c, response.NewErrorResponse(http.StatusNotFound, err.Error()))
+		return
 	}
 
-	if !h.services.PrivateFileManager.MatchOwner(file, getFileOwnerGuid(c)) {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{})
-	}
-
-	if err := h.services.PrivateFileManager.DeleteFile(uuid); err != nil {
-		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
-	}
-
-	c.JSON(http.StatusNoContent, gin.H{})
+	response.Success(c, response.NewCodeResponse(http.StatusNoContent))
 }

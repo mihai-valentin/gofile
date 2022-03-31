@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func (h *Handler) checkHealth(c *gin.Context) {
+func (h *FileHandler) checkHealth(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"health": "OK"})
 }

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) uploadPublicFile(c *gin.Context) {
+func (h *FileHandler) uploadPublicFile(c *gin.Context) {
 	var pubicFilesUploadRequest request.PubicFilesUploadRequest
 
 	if err := c.ShouldBind(&pubicFilesUploadRequest); err != nil {
@@ -15,7 +15,7 @@ func (h *Handler) uploadPublicFile(c *gin.Context) {
 		return
 	}
 
-	files, err := h.services.PublicFileManager.UploadFiles(pubicFilesUploadRequest)
+	files, err := h.service.UploadFiles(pubicFilesUploadRequest)
 	if err != nil {
 		response.Fail(c, response.NewErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
@@ -24,24 +24,25 @@ func (h *Handler) uploadPublicFile(c *gin.Context) {
 	c.JSON(http.StatusCreated, files)
 }
 
-func (h *Handler) getPublicFile(c *gin.Context) {
+func (h *FileHandler) getPublicFile(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	file, err := h.services.PublicFileManager.GetFile(uuid)
+	file, err := h.service.GetFileByFilter(uuid)
 	if err != nil {
-		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
+		response.Fail(c, response.NewErrorResponse(http.StatusNotFound, err.Error()))
 		return
 	}
 
 	c.File(file.Path)
 }
 
-func (h *Handler) deletePublicFile(c *gin.Context) {
+func (h *FileHandler) deletePublicFile(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	if err := h.services.PublicFileManager.DeleteFile(uuid); err != nil {
-		c.AbortWithStatusJSON(err.GetCode(), gin.H{"error": err.Error()})
+	if err := h.service.DeleteFileByFilter(uuid); err != nil {
+		response.Fail(c, response.NewErrorResponse(http.StatusNotFound, err.Error()))
+		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{})
+	response.Success(c, response.NewCodeResponse(http.StatusNoContent))
 }

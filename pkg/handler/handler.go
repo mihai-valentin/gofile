@@ -2,18 +2,37 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"gofile/pkg/service"
+	"gofile/pkg/entity"
 )
 
-type Handler struct {
-	services *service.Service
+type Condition struct {
+	Field    string
+	Operator string
+	Value    string
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+type EntityFilter struct {
+	Conditions []*Condition
 }
 
-func (h *Handler) InitRouter() *gin.Engine {
+type FileUploadData struct {
+}
+
+type FileServiceInterface interface {
+	UploadFiles(fileUploadData *FileUploadData) ([]*entity.File, error)
+	GetFileByFilter(filter *EntityFilter) (*entity.File, error)
+	DeleteFileByFilter(filter *EntityFilter) error
+}
+
+type FileHandler struct {
+	service FileServiceInterface
+}
+
+func New(service FileServiceInterface) *FileHandler {
+	return &FileHandler{service}
+}
+
+func (h *FileHandler) InitRouter() *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/health", h.checkHealth)
