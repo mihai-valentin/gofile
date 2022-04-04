@@ -40,6 +40,7 @@ func (r FileSqlite) buildEntity(fileData FileDataInterface) *entity.File {
 
 func (r *FileSqlite) CreateFile(fileData FileDataInterface) (*entity.File, error) {
 	file := r.buildEntity(fileData)
+
 	query := fmt.Sprintf(
 		"INSERT INTO %s (uuid, name, disk, path, owner_sign, created_at) VALUES ($1, $2, $3, $4, $5, $6)",
 		r.table,

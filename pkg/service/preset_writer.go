@@ -12,7 +12,7 @@ import (
 	"os"
 )
 
-type ImageFileDataInterface interface {
+type PresetDataInterface interface {
 	GetSource() *multipart.FileHeader
 	GetScale() uint
 	GetEncoding() string
@@ -21,8 +21,8 @@ type ImageFileDataInterface interface {
 type PresetWriter struct {
 }
 
-func (w *PresetWriter) writePreset(fileData ImageFileDataInterface, path string) error {
-	src, err := fileData.GetSource().Open()
+func (w *PresetWriter) writePreset(presetData PresetDataInterface, path string) error {
+	src, err := presetData.GetSource().Open()
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func (w *PresetWriter) writePreset(fileData ImageFileDataInterface, path string)
 		return err
 	}
 
-	resizedImage := resize.Resize(fileData.GetScale(), 0, imageContent, resize.Lanczos3)
+	resizedImage := resize.Resize(presetData.GetScale(), 0, imageContent, resize.Lanczos3)
 
 	out, err := os.Create(path)
 	if err != nil {
@@ -41,7 +41,7 @@ func (w *PresetWriter) writePreset(fileData ImageFileDataInterface, path string)
 	}
 	defer out.Close()
 
-	return w.encodePreset(fileData.GetEncoding(), out, resizedImage)
+	return w.encodePreset(presetData.GetEncoding(), out, resizedImage)
 }
 
 func (w *PresetWriter) encodePreset(encoding string, dist *os.File, src image.Image) error {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"gofile/internal"
 	"gofile/pkg/handler"
-	"gofile/pkg/infrastructure"
 	"gofile/pkg/repository"
 	"gofile/pkg/service"
 	"os"
@@ -28,17 +28,17 @@ func main() {
 		logrus.Fatal(err.Error())
 	}
 
-	config, err := infrastructure.NewConfig()
+	config, err := internal.NewConfig()
 	if err != nil {
 		logrus.Fatal(err.Error())
 	}
 
-	err = infrastructure.NewStorage(config).Init()
+	err = internal.NewStorage(config).Init()
 	if err != nil {
 		logrus.Fatal(err.Error())
 	}
 
-	db, err := infrastructure.NewSqliteDB()
+	db, err := internal.NewSqliteDB()
 	if err != nil {
 		logrus.Fatal(err.Error())
 	}
@@ -47,7 +47,7 @@ func main() {
 	services := service.New(repositories, config.Get("storage.root"))
 	handlers := handler.New(services)
 
-	server := new(infrastructure.Server)
+	server := new(internal.Server)
 	server.RunInGoroutine(config.Get("http.port"), handlers.InitRouter())
 
 	quit := make(chan os.Signal, 1)

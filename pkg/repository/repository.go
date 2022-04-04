@@ -1,12 +1,14 @@
 package repository
 
-import "gofile/pkg/infrastructure"
+import (
+	"gofile/internal"
+)
 
 type Repository struct {
 	*FileSqlite
 }
 
-func New(db *infrastructure.Database) *Repository {
+func New(db *internal.Database) *Repository {
 	return &Repository{
 		NewPublicFileSqlite(db.DB),
 	}
