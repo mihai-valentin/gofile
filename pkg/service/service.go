@@ -2,19 +2,21 @@ package service
 
 import (
 	"gofile/pkg/entity"
-	"gofile/pkg/handler"
+	"gofile/pkg/repository"
 )
 
 type FileRepositoryInterface interface {
-	CreateFile(file *entity.File) error
-	FindFileByUuid(uuid string) (*entity.File, error)
-	DeleteFileByUuid(uuid string) error
+	CreateFile(fileData repository.FileDataInterface) (*entity.File, error)
+	FindByUuid(uuid string) (*entity.File, error)
+	DeleteByUuid(uuid string) error
 }
 
-func New(repository FileRepositoryInterface, access string) *handler.FileServiceInterface {
-	if access == "public" {
-		return new(PublicFileManager)
-	}
+type Service struct {
+	*FileManager
+}
 
-	return new(PrivateFileManager)
+func New(repository FileRepositoryInterface, storageRoot string) *Service {
+	return &Service{
+		FileManager: NewPublicFileManager(repository, storageRoot),
+	}
 }

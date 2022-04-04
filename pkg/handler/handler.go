@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"gofile/pkg/data"
 	"gofile/pkg/entity"
 )
 
@@ -15,13 +16,10 @@ type EntityFilter struct {
 	Conditions []*Condition
 }
 
-type FileUploadData struct {
-}
-
 type FileServiceInterface interface {
-	UploadFiles(fileUploadData *FileUploadData) ([]*entity.File, error)
-	GetFileByFilter(filter *EntityFilter) (*entity.File, error)
-	DeleteFileByFilter(filter *EntityFilter) error
+	UploadFiles(filesUploadData []*data.UploadFileData) ([]*entity.File, error)
+	GetFile(uuid string, ownerSign string) (string, error)
+	DeleteFile(uuid string, ownerSign string) error
 }
 
 type FileHandler struct {
@@ -41,19 +39,9 @@ func (h *FileHandler) InitRouter() *gin.Engine {
 	{
 		files := api.Group("/files")
 		{
-			public := files.Group("/public")
-			{
-				public.POST("", h.uploadPublicFile)
-				public.GET("/:uuid", h.getPublicFile)
-				public.DELETE("/:uuid", h.deletePublicFile)
-			}
-
-			private := files.Group("/private")
-			{
-				private.POST("", h.uploadPrivateFile)
-				private.GET("/:uuid", h.getPrivateFile)
-				private.DELETE("/:uuid", h.deletePrivateFile)
-			}
+			files.POST("", h.uploadFile)
+			files.GET("/:uuid", h.getFile)
+			files.DELETE("/:uuid", h.deleteFile)
 		}
 	}
 

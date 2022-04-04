@@ -44,7 +44,7 @@ func main() {
 	}
 
 	repositories := repository.New(db)
-	services := service.New(repositories)
+	services := service.New(repositories, config.Get("storage.root"))
 	handlers := handler.New(services)
 
 	server := new(infrastructure.Server)
