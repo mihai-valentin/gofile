@@ -23,8 +23,7 @@ ToDo:
 func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		logrus.Fatal(err.Error())
 	}
 
@@ -33,8 +32,7 @@ func main() {
 		logrus.Fatal(err.Error())
 	}
 
-	err = internal.NewStorage(config).Init()
-	if err != nil {
+	if err := internal.NewStorage(config).Init(); err != nil {
 		logrus.Fatal(err.Error())
 	}
 
@@ -43,12 +41,15 @@ func main() {
 		logrus.Fatal(err.Error())
 	}
 
-	repositories := repository.New(db)
-	services := service.New(repositories, config.Get("storage.root"))
+	httpPort := config.Get("http.port")
+	storageRoot := config.Get("storage.root")
+
+	repositories := repository.New(db.DB)
+	services := service.New(repositories, storageRoot)
 	handlers := handler.New(services)
 
 	server := new(internal.Server)
-	server.RunInGoroutine(config.Get("http.port"), handlers.InitRouter())
+	server.RunInGoroutine(httpPort, handlers.InitRouter())
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)

@@ -1,15 +1,13 @@
 package repository
 
-import (
-	"gofile/internal"
-)
+import "github.com/jmoiron/sqlx"
 
 type Repository struct {
 	*FileSqlite
 }
 
-func New(db *internal.Database) *Repository {
+func New(db *sqlx.DB) *Repository {
 	return &Repository{
-		NewPublicFileSqlite(db.DB),
+		NewPublicFileSqlite(db),
 	}
 }
