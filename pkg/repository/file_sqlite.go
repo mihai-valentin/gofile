@@ -3,17 +3,10 @@ package repository
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"gofile/pkg/contracts"
 	"gofile/pkg/entity"
 	"time"
 )
-
-type FileDataInterface interface {
-	GetUuid() string
-	GetFilename() string
-	GetDisk() string
-	GetPath() string
-	GetOwnerSign() string
-}
 
 type FileSqlite struct {
 	db    *sqlx.DB
@@ -27,7 +20,7 @@ func NewPublicFileSqlite(db *sqlx.DB) *FileSqlite {
 	}
 }
 
-func (r FileSqlite) buildEntity(fileData FileDataInterface) *entity.File {
+func (r FileSqlite) buildEntity(fileData contracts.FileUploadDataInterface) *entity.File {
 	return &entity.File{
 		Uuid:      fileData.GetUuid(),
 		Name:      fileData.GetFilename(),
@@ -38,7 +31,7 @@ func (r FileSqlite) buildEntity(fileData FileDataInterface) *entity.File {
 	}
 }
 
-func (r *FileSqlite) CreateFile(fileData FileDataInterface) (*entity.File, error) {
+func (r *FileSqlite) StoreFile(fileData contracts.FileUploadDataInterface) (contracts.FileEntityInterface, error) {
 	file := r.buildEntity(fileData)
 
 	query := fmt.Sprintf(
@@ -56,7 +49,7 @@ func (r *FileSqlite) CreateFile(fileData FileDataInterface) (*entity.File, error
 	return file, nil
 }
 
-func (r *FileSqlite) FindByUuid(uuid string) (*entity.File, error) {
+func (r *FileSqlite) FindByUuid(uuid string) (contracts.FileEntityInterface, error) {
 	file := entity.File{}
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE uuid = $1", r.table)

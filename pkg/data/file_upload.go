@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type UploadFileData struct {
+type FileUpload struct {
 	Source    *multipart.FileHeader
 	Uuid      string
 	Filename  string
@@ -16,16 +16,16 @@ type UploadFileData struct {
 	Scale     uint
 }
 
-func NewUploadFileData(
+func NewFileUpload(
 	source *multipart.FileHeader,
 	filename string,
 	disk string,
 	ownerSign string,
 	scale uint,
-) *UploadFileData {
+) *FileUpload {
 	uuid := xid.New().String()
 
-	return &UploadFileData{
+	return &FileUpload{
 		Source:    source,
 		Uuid:      uuid,
 		Filename:  filename,
@@ -36,42 +36,42 @@ func NewUploadFileData(
 	}
 }
 
-func (d *UploadFileData) GetSource() *multipart.FileHeader {
+func (d *FileUpload) GetSource() *multipart.FileHeader {
 	return d.Source
 }
 
-func (d *UploadFileData) GetUuid() string {
+func (d *FileUpload) GetUuid() string {
 	return d.Uuid
 }
 
-func (d *UploadFileData) GetFilename() string {
+func (d *FileUpload) GetFilename() string {
 	return d.Filename
 }
 
-func (d *UploadFileData) GetDisk() string {
+func (d *FileUpload) GetDisk() string {
 	return d.Disk
 }
 
-func (d *UploadFileData) GetPath() string {
+func (d *FileUpload) GetPath() string {
 	return d.Path
 }
 
-func (d *UploadFileData) GetOwnerSign() string {
+func (d *FileUpload) GetOwnerSign() string {
 	return d.OwnerSign
 }
 
-func (d *UploadFileData) GetScale() uint {
+func (d *FileUpload) GetScale() uint {
 	return d.Scale
 }
 
-func (d *UploadFileData) GetEncoding() string {
-	return strings.Split(d.Source.Header.Get("Content-Type"), "/")[1]
-}
-
-func (d *UploadFileData) IsResizable() bool {
+func (d *FileUpload) IsResizable() bool {
 	return d.Scale != 0
 }
 
-func (d *UploadFileData) IsImage() bool {
+func (d *FileUpload) GetEncoding() string {
+	return strings.Split(d.Source.Header.Get("Content-Type"), "/")[1]
+}
+
+func (d *FileUpload) IsImage() bool {
 	return strings.HasPrefix(d.Source.Header.Get("Content-Type"), "image")
 }

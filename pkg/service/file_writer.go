@@ -1,19 +1,15 @@
 package service
 
 import (
+	"gofile/pkg/contracts"
 	"io"
-	"mime/multipart"
 	"os"
 )
-
-type FileDataInterface interface {
-	GetSource() *multipart.FileHeader
-}
 
 type FileWriter struct {
 }
 
-func (w *FileWriter) writeFile(fileData FileDataInterface, path string) error {
+func (w *FileWriter) writeFile(fileData contracts.FileUploadDataInterface, path string) error {
 	src, err := fileData.GetSource().Open()
 	if err != nil {
 		return err

@@ -2,30 +2,24 @@ package mapper
 
 import (
 	"fmt"
+	"gofile/pkg/contracts"
 	"gofile/pkg/data"
 	"mime/multipart"
 	"strings"
 )
 
-type UploadRequestInterface interface {
-	GetFormFiles() []*multipart.FileHeader
-	GetPresets() []uint
-	GetDisk() string
-	GetOwnerSign() string
+type UploadData struct {
 }
 
-type UploadDataMapper struct {
-}
-
-func (m *UploadDataMapper) MapFromRequest(r UploadRequestInterface) []*data.UploadFileData {
+func (m *UploadData) MapFromRequest(r contracts.FileUploadFormInterface) []contracts.FileUploadDataInterface {
 	formFiles := r.GetFormFiles()
 	arePresetsPresent := len(r.GetPresets()) > 0
 
 	var images []*multipart.FileHeader
-	var filesData []*data.UploadFileData
+	var filesData []contracts.FileUploadDataInterface
 
 	for _, formFile := range formFiles {
-		uploadFileData := data.NewUploadFileData(formFile, formFile.Filename, r.GetDisk(), r.GetOwnerSign(), 0)
+		uploadFileData := data.NewFileUpload(formFile, formFile.Filename, r.GetDisk(), r.GetOwnerSign(), 0)
 		filesData = append(filesData, uploadFileData)
 
 		if !arePresetsPresent {
@@ -46,17 +40,17 @@ func (m *UploadDataMapper) MapFromRequest(r UploadRequestInterface) []*data.Uplo
 	return filesData
 }
 
-func (m *UploadDataMapper) mapPresetsFromRequest(
-	r UploadRequestInterface,
+func (m *UploadData) mapPresetsFromRequest(
+	r contracts.FileUploadFormInterface,
 	images []*multipart.FileHeader,
-) []*data.UploadFileData {
+) []contracts.FileUploadDataInterface {
 	presets := r.GetPresets()
-	var presetsUploadData []*data.UploadFileData
+	var presetsUploadData []contracts.FileUploadDataInterface
 
 	for _, image := range images {
 		for _, preset := range presets {
 			presetFilename := fmt.Sprintf("%d_%s", preset, image.Filename)
-			presetUploadData := data.NewUploadFileData(image, presetFilename, r.GetDisk(), r.GetOwnerSign(), preset)
+			presetUploadData := data.NewFileUpload(image, presetFilename, r.GetDisk(), r.GetOwnerSign(), preset)
 			presetsUploadData = append(presetsUploadData, presetUploadData)
 		}
 	}

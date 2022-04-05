@@ -2,31 +2,14 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"gofile/pkg/data"
-	"gofile/pkg/entity"
+	"gofile/pkg/contracts"
 )
 
-type Condition struct {
-	Field    string
-	Operator string
-	Value    string
-}
-
-type EntityFilter struct {
-	Conditions []*Condition
-}
-
-type FileServiceInterface interface {
-	UploadFiles(filesUploadData []*data.UploadFileData) ([]*entity.File, error)
-	GetFile(uuid string, ownerSign string) (string, error)
-	DeleteFile(uuid string, ownerSign string) error
-}
-
 type FileHandler struct {
-	service FileServiceInterface
+	service contracts.FileServiceInterface
 }
 
-func New(service FileServiceInterface) *FileHandler {
+func New(service contracts.FileServiceInterface) *FileHandler {
 	return &FileHandler{service}
 }
 

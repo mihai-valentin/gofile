@@ -3,25 +3,19 @@ package service
 import (
 	"errors"
 	"github.com/nfnt/resize"
+	"gofile/pkg/contracts"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"log"
-	"mime/multipart"
 	"os"
 )
-
-type PresetDataInterface interface {
-	GetSource() *multipart.FileHeader
-	GetScale() uint
-	GetEncoding() string
-}
 
 type PresetWriter struct {
 }
 
-func (w *PresetWriter) writePreset(presetData PresetDataInterface, path string) error {
+func (w *PresetWriter) writePreset(presetData contracts.FileUploadDataInterface, path string) error {
 	src, err := presetData.GetSource().Open()
 	if err != nil {
 		return err

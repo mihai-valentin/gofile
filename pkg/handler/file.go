@@ -9,14 +9,13 @@ import (
 
 func (h *FileHandler) uploadFile(c *gin.Context) {
 	var uploadRequest request.FilesUploadRequest
-	dataMapper := new(mapper.UploadDataMapper)
 
 	if err := c.ShouldBind(&uploadRequest); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, err.Error())
 		return
 	}
 
-	filesUploadData := dataMapper.MapFromRequest(&uploadRequest)
+	filesUploadData := new(mapper.UploadData).MapFromRequest(&uploadRequest)
 	files, err := h.service.UploadFiles(filesUploadData)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
